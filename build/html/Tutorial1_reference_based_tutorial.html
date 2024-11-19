@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tutorial 1: Reference-based simulation &mdash; sphinx_test v1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5cb08e4e"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Installation" href="Installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            sphinx_test
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial 1: Reference-based simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#estimate-parameters-from-the-reference-data">estimate parameters from the reference data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simulated-data-using-Spider">simulated data using Spider</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">sphinx_test</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Tutorial 1: Reference-based simulation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Tutorial1_reference_based_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Tutorial-1:-Reference-based-simulation">
+<h1>Tutorial 1: Reference-based simulation<a class="headerlink" href="#Tutorial-1:-Reference-based-simulation" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spider</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">real_adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="s2">&quot;../data/STARmap_15ct/15ct_realdata.h5ad&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<section id="estimate-parameters-from-the-reference-data">
+<h2>estimate parameters from the reference data<a class="headerlink" href="#estimate-parameters-from-the-reference-data" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_trans</span><span class="p">(</span><span class="n">adata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ct</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">neighbors</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="n">sn</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_spaital_network</span><span class="p">(</span><span class="n">Num_sample</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                         <span class="n">spatial</span><span class="o">=</span><span class="n">adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;spatial&quot;</span><span class="p">],</span> <span class="n">coord_type</span> <span class="o">=</span> <span class="s2">&quot;generic&quot;</span><span class="p">,</span>
+                         <span class="n">n_neighs</span><span class="o">=</span><span class="n">neighbors</span><span class="p">)</span>
+    <span class="n">onehot_ct</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_onehot_ct</span><span class="p">(</span><span class="n">init_assign</span><span class="o">=</span><span class="n">ct</span><span class="p">)</span>
+    <span class="n">nb_count</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sn</span> <span class="o">*</span> <span class="n">onehot_ct</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">target_trans</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_nb_freq</span><span class="p">(</span><span class="n">nb_count</span><span class="o">=</span><span class="n">nb_count</span><span class="p">,</span> <span class="n">onehot_ct</span><span class="o">=</span><span class="n">onehot_ct</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">target_trans</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Num_ct_sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">real_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+
+<span class="n">prior</span>  <span class="o">=</span> <span class="n">Num_ct_sample</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">Num_ct_sample</span><span class="p">)</span>
+
+<span class="n">real_celltype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">real_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">celltype</span><span class="p">)</span>
+
+<span class="n">match_list</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Num_ct_sample</span><span class="p">)),</span><span class="n">real_celltype</span><span class="p">))</span>
+
+<span class="n">target_trans</span> <span class="o">=</span> <span class="n">get_trans</span><span class="p">(</span><span class="n">adata</span> <span class="o">=</span> <span class="n">real_adata</span> <span class="p">,</span> <span class="n">ct</span> <span class="o">=</span> <span class="n">real_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">label</span><span class="p">,</span><span class="n">neighbors</span> <span class="o">=</span> <span class="mi">8</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/sklearn/preprocessing/_encoders.py:975: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
+  warnings.warn(
+</pre></div></div>
+</div>
+</section>
+<section id="simulated-data-using-Spider">
+<h2>simulated data using Spider<a class="headerlink" href="#simulated-data-using-Spider" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">res</span><span class="p">,</span> <span class="n">cell_location</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">simulate_10X</span><span class="p">(</span><span class="n">cell_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">Num_celltype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">prior</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">target_trans</span><span class="o">=</span><span class="n">target_trans</span><span class="p">,</span>
+                        <span class="n">spot_radius</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">spot_min</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">spot_max</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">image_width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">image_height</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">cell_location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">tol</span><span class="o">=</span><span class="mf">2e-2</span><span class="p">,</span>
+                        <span class="n">T</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span>
+                        <span class="n">loop_times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">smallsample_max_iter</span><span class="o">=</span><span class="mi">100000</span><span class="p">,</span>
+                        <span class="n">bigsample_max_iter</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+                        <span class="n">ref</span><span class="o">=</span><span class="n">real_adata</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/sklearn/preprocessing/_encoders.py:975: FutureWarning: `sparse` was renamed to `sparse_output` in version 1.2 and will be removed in 1.4. `sparse_output` is ignored unless you leave `sparse` to its default value.
+  warnings.warn(
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/spider/Annealing.py:81: RuntimeWarning: invalid value encountered in double_scalars
+  if 0 &gt; (dist_before - dist_after):
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+swap_num:  1
+Refine cell type using Metropolis–Hastings algorithm.
+Sample num:1523
+ 1000 iteration, error 1.416
+ 2000 iteration, error 1.368
+ 3000 iteration, error 1.433
+ 4000 iteration, error 1.438
+ 5000 iteration, error 1.398
+ 6000 iteration, error 1.374
+ 7000 iteration, error 1.398
+ 8000 iteration, error 1.381
+ 9000 iteration, error 1.373
+10000 iteration, error 1.437
+11000 iteration, error 1.371
+12000 iteration, error 1.376
+13000 iteration, error 1.335
+14000 iteration, error 1.210
+15000 iteration, error 1.135
+16000 iteration, error 1.072
+17000 iteration, error 1.021
+18000 iteration, error 0.991
+19000 iteration, error 0.938
+20000 iteration, error 0.927
+21000 iteration, error 0.885
+22000 iteration, error 0.881
+23000 iteration, error 0.818
+24000 iteration, error 0.814
+25000 iteration, error 0.801
+26000 iteration, error 0.787
+27000 iteration, error 0.777
+28000 iteration, error 0.760
+29000 iteration, error 0.746
+30000 iteration, error 0.747
+31000 iteration, error 0.727
+32000 iteration, error 0.747
+33000 iteration, error 0.695
+34000 iteration, error 0.684
+35000 iteration, error 0.677
+36000 iteration, error 0.671
+37000 iteration, error 0.669
+38000 iteration, error 0.661
+39000 iteration, error 0.661
+40000 iteration, error 0.650
+41000 iteration, error 0.673
+42000 iteration, error 0.645
+43000 iteration, error 0.646
+44000 iteration, error 0.639
+45000 iteration, error 0.631
+46000 iteration, error 0.629
+47000 iteration, error 0.625
+48000 iteration, error 0.619
+49000 iteration, error 0.611
+50000 iteration, error 0.612
+51000 iteration, error 0.604
+52000 iteration, error 0.603
+53000 iteration, error 0.599
+54000 iteration, error 0.594
+55000 iteration, error 0.591
+56000 iteration, error 0.587
+57000 iteration, error 0.596
+58000 iteration, error 0.487
+59000 iteration, error 0.482
+60000 iteration, error 0.480
+61000 iteration, error 0.478
+62000 iteration, error 0.485
+63000 iteration, error 0.477
+64000 iteration, error 0.480
+65000 iteration, error 0.506
+66000 iteration, error 0.483
+67000 iteration, error 0.481
+68000 iteration, error 0.487
+69000 iteration, error 0.541
+70000 iteration, error 0.483
+71000 iteration, error 0.489
+72000 iteration, error 0.492
+73000 iteration, error 0.473
+74000 iteration, error 0.475
+75000 iteration, error 0.475
+76000 iteration, error 0.481
+77000 iteration, error 0.481
+78000 iteration, error 0.497
+79000 iteration, error 0.561
+80000 iteration, error 0.475
+81000 iteration, error 0.493
+82000 iteration, error 0.496
+83000 iteration, error 0.462
+84000 iteration, error 0.479
+85000 iteration, error 0.481
+86000 iteration, error 0.481
+87000 iteration, error 0.505
+88000 iteration, error 0.480
+89000 iteration, error 0.512
+90000 iteration, error 0.481
+91000 iteration, error 0.463
+92000 iteration, error 0.480
+93000 iteration, error 0.508
+94000 iteration, error 0.482
+95000 iteration, error 0.489
+96000 iteration, error 0.473
+97000 iteration, error 0.485
+98000 iteration, error 0.490
+99000 iteration, error 0.484
+100000 iteration, error 0.500
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="k">def</span> <span class="nf">get_sim_cell_level_expr</span><span class="p">(</span><span class="n">celltype_assignment</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">adata</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">Num_celltype</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">Num_ct_sample</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="n">match_list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ct_key</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="c1">## 给每一个估计的细胞，分配一种单细胞里面的细胞index，</span>
+    <span class="c1">## 前提是同一组细胞的index对应到单细胞数据里面是同一种细胞类型</span>
+    <span class="k">assert</span> <span class="n">adata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;please input an adata about singlecell, if you don&#39;t want to find it in your folder,&quot;</span><span class="o">+</span>
+               <span class="s2">&quot;here we We provide a single-cell data simulation strategy for you to choose&quot;</span><span class="p">)</span>
+
+
+    <span class="n">idx_list</span> <span class="o">=</span> <span class="n">celltype_assignment</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">Num_celltype</span><span class="p">):</span>
+        <span class="c1">## 找到单细胞中的指定细胞类型的细胞</span>
+        <span class="n">ct_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="n">ct_key</span><span class="p">]</span><span class="o">==</span><span class="n">match_list</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">## 抽取指定模拟该细胞类型数量的细胞，得到在单细胞里面的idx</span>
+        <span class="n">sim_cell_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">ct_idx</span><span class="p">,</span><span class="n">size</span> <span class="o">=</span> <span class="n">Num_ct_sample</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">replace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">idx_list</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">celltype_assignment</span><span class="o">==</span><span class="n">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">sim_cell_idx</span>
+
+    <span class="n">sim_cell_expr</span> <span class="o">=</span> <span class="n">adata</span><span class="p">[</span><span class="n">idx_list</span><span class="p">]</span>
+    <span class="c1">#sim_cell_expr.obs[&quot;sim_celltype&quot;] = res</span>
+    <span class="k">return</span> <span class="n">sim_cell_expr</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spider_adata</span> <span class="o">=</span> <span class="n">get_sim_cell_level_expr</span><span class="p">(</span><span class="n">celltype_assignment</span><span class="o">=</span><span class="n">res</span><span class="p">,</span>
+                                       <span class="n">adata</span><span class="o">=</span><span class="n">real_adata</span><span class="p">,</span>
+                                       <span class="n">Num_celltype</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">Num_ct_sample</span><span class="p">),</span>
+                                       <span class="n">Num_ct_sample</span><span class="o">=</span><span class="n">Num_ct_sample</span><span class="p">,</span>
+                                       <span class="n">match_list</span><span class="o">=</span><span class="n">match_list</span><span class="p">,</span>
+                                       <span class="n">ct_key</span><span class="o">=</span><span class="s2">&quot;celltype&quot;</span><span class="p">)</span>
+<span class="n">spider_adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;spatial&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">real_adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;spatial&quot;</span><span class="p">]</span>
+<span class="n">spider_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;cell&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spider_adata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+/var/folders/_s/mg8jr2xx3_vg8zqjqwyjv0_m0000gn/T/ipykernel_26542/1495643098.py:7: ImplicitModificationWarning: Setting element `.obsm[&#39;spatial&#39;]` of view, initializing view as actual.
+  spider_adata.obsm[&#34;spatial&#34;] = real_adata.obsm[&#34;spatial&#34;]
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/anndata/_core/anndata.py:1897: UserWarning: Observation names are not unique. To make them unique, call `.obs_names_make_unique`.
+  utils.warn_names_duplicates(&#34;obs&#34;)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spider_adata</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+AnnData object with n_obs × n_vars = 1523 × 882
+    obs: &#39;celltype&#39;, &#39;label&#39;
+    var: &#39;gene&#39;
+    uns: &#39;svg_scanpy&#39;, &#39;svg_squidpy&#39;
+    obsm: &#39;spatial&#39;
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, era yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
