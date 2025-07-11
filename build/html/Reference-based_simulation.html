@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reference-based Simulation &mdash; Spider v1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/nbsphinx-code-cells.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5cb08e4e"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Benchmark datasets generation" href="Benchmark_datasets_generation.html" />
+    <link rel="prev" title="Welcome to Spider’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Spider
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reference-based Simulation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Simulation-using-PSA-function">Simulation using PSA function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Benchmark_datasets_generation.html">Benchmark datasets generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TIME_simulation.html">Tumor immune microenvironments ST dataset simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="3D_simulation.html">3D ST dataset simulation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Spider</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Reference-based Simulation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Reference-based_simulation.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Reference-based-Simulation">
+<h1>Reference-based Simulation<a class="headerlink" href="#Reference-based-Simulation" title="Link to this heading"></a></h1>
+<p>In this tutorial, we performed reference-based simulation using Spider, which infers both the transition matrix and cell type proportions directly from the reference dataset. For our reference data, we employed single-cell resolution spatial transcriptomics data from the mouse visual cortex (available at <a class="reference external" href="https://www.starmapresources.com/data">https://www.starmapresources.com/data</a>). This comprehensive dataset captured 1,549 cells representing 15 distinct cell types, which were rigorously identified through clustering analysis with
+carefully curated marker genes.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">spider</span> <span class="k">as</span> <span class="nn">sp</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">anndata</span> <span class="k">as</span> <span class="nn">ad</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span> <span class="n">color_map</span> <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span><span class="p">,</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ref_path</span> <span class="o">=</span> <span class="s2">&quot;./Benchmark_datasets/&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">#choose cell_level data</span>
+<span class="n">ref_adata</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">ref_path</span> <span class="o">+</span> <span class="s2">&quot;use_ref.h5ad&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">save_path</span> <span class="o">=</span> <span class="s2">&quot;./&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Num_ct_sample</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">ref_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+<span class="n">Num_celltype</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Num_ct_sample</span><span class="p">)</span>
+<span class="n">real_celltype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ref_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">celltype</span><span class="p">)</span>
+<span class="n">match_list</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Num_ct_sample</span><span class="p">)),</span><span class="n">real_celltype</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<section id="Simulation-using-PSA-function">
+<h2>Simulation using PSA function<a class="headerlink" href="#Simulation-using-PSA-function" title="Link to this heading"></a></h2>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spider_adata</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">PSA</span><span class="p">(</span><span class="n">grid_row</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">grid_col</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">adata</span><span class="o">=</span><span class="n">ref_adata</span><span class="p">,</span><span class="n">perturb</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">seed</span><span class="o">=</span><span class="mi">2025</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+[Parallel(n_jobs=4)]: Using backend LokyBackend with 4 concurrent workers.
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/networkx/utils/backends.py:135: RuntimeWarning: networkx backend defined more than once: nx-loopback
+  backends.update(_get_backends(&#34;networkx.backends&#34;))
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/networkx/utils/backends.py:135: RuntimeWarning: networkx backend defined more than once: nx-loopback
+  backends.update(_get_backends(&#34;networkx.backends&#34;))
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/networkx/utils/backends.py:135: RuntimeWarning: networkx backend defined more than once: nx-loopback
+  backends.update(_get_backends(&#34;networkx.backends&#34;))
+/Users/era/anaconda3/envs/spider/lib/python3.9/site-packages/networkx/utils/backends.py:135: RuntimeWarning: networkx backend defined more than once: nx-loopback
+  backends.update(_get_backends(&#34;networkx.backends&#34;))
+[Parallel(n_jobs=4)]: Done   5 tasks      | elapsed:   14.4s
+[Parallel(n_jobs=4)]: Done  10 tasks      | elapsed:   15.6s
+[Parallel(n_jobs=4)]: Done  17 tasks      | elapsed:   16.9s
+[Parallel(n_jobs=4)]: Done  24 tasks      | elapsed:   18.2s
+[Parallel(n_jobs=4)]: Done  33 tasks      | elapsed:   19.7s
+[Parallel(n_jobs=4)]: Done  42 tasks      | elapsed:   21.9s
+[Parallel(n_jobs=4)]: Done  53 tasks      | elapsed:   24.9s
+[Parallel(n_jobs=4)]: Done  64 tasks      | elapsed:   27.4s
+[Parallel(n_jobs=4)]: Done  77 tasks      | elapsed:   30.4s
+[Parallel(n_jobs=4)]: Done  90 tasks      | elapsed:   33.8s
+[Parallel(n_jobs=4)]: Done 100 out of 100 | elapsed:   35.7s finished
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spider_adata</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_sim_cell_level_expr</span><span class="p">(</span><span class="n">celltype_assignment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">spider_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">spider_simu</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span> <span class="p">,</span>
+                                       <span class="n">adata</span><span class="o">=</span><span class="n">ref_adata</span><span class="p">,</span>
+                                       <span class="n">Num_celltype</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">Num_ct_sample</span><span class="p">),</span>
+                                       <span class="n">Num_ct_sample</span><span class="o">=</span><span class="n">Num_ct_sample</span><span class="p">,</span>
+                                       <span class="n">match_list</span><span class="o">=</span><span class="n">match_list</span><span class="p">,</span>
+                                       <span class="n">ct_key</span><span class="o">=</span><span class="s2">&quot;celltype&quot;</span><span class="p">)</span>
+<span class="n">spider_adata</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;cell&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spider_adata</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="p">]</span>
+
+<span class="n">spider_adata</span><span class="o">.</span><span class="n">write_h5ad</span><span class="p">(</span><span class="n">save_path</span><span class="o">+</span> <span class="s2">&quot;/spider_perturb_simu_cell_level.h5ad&quot;</span><span class="p">)</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">spider_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;x&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spider_adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;spatial&quot;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">spider_adata</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spider_adata</span><span class="o">.</span><span class="n">obsm</span><span class="p">[</span><span class="s2">&quot;spatial&quot;</span><span class="p">][:,</span><span class="mi">1</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">pl</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">spider_adata</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;celltype&quot;</span><span class="p">,</span><span class="n">x</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="n">y</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="_images/Reference-based_simulation_12_0.png" class="no-scaled-link" src="_images/Reference-based_simulation_12_0.png" style="width: 365px; height: 440px;" />
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to Spider’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Benchmark_datasets_generation.html" class="btn btn-neutral float-right" title="Benchmark datasets generation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jiyuan Yang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
